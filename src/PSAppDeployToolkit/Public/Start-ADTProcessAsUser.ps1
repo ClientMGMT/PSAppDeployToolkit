@@ -306,27 +306,34 @@ function Start-ADTProcessAsUser
 
     process
     {
+        # Return early if we're not running as SYSTEM.
+        if (![System.Security.Principal.WindowsIdentity]::GetCurrent().User.IsWellKnown([System.Security.Principal.WellKnownSidType]::LocalSystemSid))
+        {
+            Write-ADTLogEntry -Message "This function cannot start processes as other users unless it is running as [NT AUTHORITY\SYSTEM]. Returning without performing process invocation." -Severity 2
+            return
+        }
+
         # Announce start.
         switch ($PSCmdlet.ParameterSetName)
         {
             Username
             {
-                Write-ADTLogEntry -Message "Invoking [$FilePath$(if (!$SecureArgumentList) { " $ArgumentList" })] as user [$Username]$(if ($Wait) { ", and waiting for invocation to finish" })."
+                Write-ADTLogEntry -Message "Invoking [$FilePath$(if ($ArgumentList -and !$SecureArgumentList) { " $ArgumentList" })] as user [$Username]$(if ($Wait) { ", and waiting for invocation to finish" })."
                 break
             }
             SessionId
             {
-                Write-ADTLogEntry -Message "Invoking [$FilePath$(if (!$SecureArgumentList) { " $ArgumentList" })] for session [$SessionId]$(if ($Wait) { ", and waiting for invocation to finish" })."
+                Write-ADTLogEntry -Message "Invoking [$FilePath$(if ($ArgumentList -and !$SecureArgumentList) { " $ArgumentList" })] for session [$SessionId]$(if ($Wait) { ", and waiting for invocation to finish" })."
                 break
             }
             AllActiveUserSessions
             {
-                Write-ADTLogEntry -Message "Invoking [$FilePath$(if (!$SecureArgumentList) { " $ArgumentList" })] for all active user sessions$(if ($Wait) { ", and waiting for all invocations to finish" })."
+                Write-ADTLogEntry -Message "Invoking [$FilePath$(if ($ArgumentList -and !$SecureArgumentList) { " $ArgumentList" })] for all active user sessions$(if ($Wait) { ", and waiting for all invocations to finish" })."
                 break
             }
             PrimaryActiveUserSession
             {
-                Write-ADTLogEntry -Message "Invoking [$FilePath$(if (!$SecureArgumentList) { " $ArgumentList" })] for the primary user session$(if ($Wait) { ", and waiting for invocation to finish" })."
+                Write-ADTLogEntry -Message "Invoking [$FilePath$(if ($ArgumentList -and !$SecureArgumentList) { " $ArgumentList" })] for the primary user session$(if ($Wait) { ", and waiting for invocation to finish" })."
                 break
             }
         }
