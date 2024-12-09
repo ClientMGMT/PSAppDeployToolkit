@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
+using System.Collections.ObjectModel;
 
 namespace PSADT.Types
 {
@@ -18,6 +17,7 @@ namespace PSADT.Types
         /// <param name="isCBServicingRebootPending">Indicates if Component-Based Servicing (CBS) requires a reboot.</param>
         /// <param name="isWindowsUpdateRebootPending">Indicates if a Windows Update reboot is pending.</param>
         /// <param name="isSCCMClientRebootPending">Indicates if the SCCM client requires a reboot.</param>
+        /// <param name="isIntuneClientRebootPending">Indicates if the Intune Management Extension client requires a reboot.</param>
         /// <param name="isAppVRebootPending">Indicates if an App-V client requires a reboot.</param>
         /// <param name="isFileRenameRebootPending">Indicates if file rename operations require a reboot.</param>
         /// <param name="pendingFileRenameOperations">A list of pending file rename operations.</param>
@@ -29,10 +29,11 @@ namespace PSADT.Types
             bool isCBServicingRebootPending,
             bool isWindowsUpdateRebootPending,
             bool? isSCCMClientRebootPending,
+            bool? isIntuneClientRebootPending,
             bool isAppVRebootPending,
             bool? isFileRenameRebootPending,
-            IEnumerable<string>? pendingFileRenameOperations = null,
-            StringCollection? errorMsg = null)
+            string[]? pendingFileRenameOperations,
+            string[]? errorMsg)
         {
             ComputerName = computerName;
             LastBootUpTime = lastBootUpTime;
@@ -40,10 +41,11 @@ namespace PSADT.Types
             IsCBServicingRebootPending = isCBServicingRebootPending;
             IsWindowsUpdateRebootPending = isWindowsUpdateRebootPending;
             IsSCCMClientRebootPending = isSCCMClientRebootPending;
+            IsIntuneClientRebootPending = isIntuneClientRebootPending;
             IsAppVRebootPending = isAppVRebootPending;
             IsFileRenameRebootPending = isFileRenameRebootPending;
-            PendingFileRenameOperations = pendingFileRenameOperations ?? Array.Empty<string>();
-            ErrorMsg = errorMsg ?? new StringCollection();
+            PendingFileRenameOperations = new ReadOnlyCollection<string>(pendingFileRenameOperations ?? []);
+            ErrorMsg = new ReadOnlyCollection<string>(errorMsg ?? []);
         }
 
         /// <summary>
@@ -77,6 +79,11 @@ namespace PSADT.Types
         public bool? IsSCCMClientRebootPending { get; }
 
         /// <summary>
+        /// Gets a value indicating whether the Intune Management Extension client requires a reboot.
+        /// </summary>
+        public bool? IsIntuneClientRebootPending { get; }
+
+        /// <summary>
         /// Gets a value indicating whether an App-V client requires a reboot.
         /// </summary>
         public bool IsAppVRebootPending { get; }
@@ -89,12 +96,12 @@ namespace PSADT.Types
         /// <summary>
         /// Gets the list of pending file rename operations.
         /// </summary>
-        public IEnumerable<string> PendingFileRenameOperations { get; }
+        public ReadOnlyCollection<string> PendingFileRenameOperations { get; }
 
         /// <summary>
         /// Gets the error messages related to reboot operations.
         /// </summary>
-        public StringCollection ErrorMsg { get; }
+        public ReadOnlyCollection<string> ErrorMsg { get; }
 
         /// <summary>
         /// Returns a value indicating whether any reboot is pending.
